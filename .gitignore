@@ -1,0 +1,32 @@
+# === Secretos / entorno (NUNCA versionar) ===
+.env
+.env.*
+!.env.example
+*.local
+.claude/settings.local.json
+
+# === Python (servicios que vendrán) ===
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# === Docker / datos locales ===
+*.log
+data/
+volumes/
+
+# === Sistema operativo / editores ===
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Reporte generado (se reconstruye con construir-word.sh)
+entregables/reporte/reporte.docx
+entregables/reporte/reporte.pdf
+.~lock.*#
+
+# README completo del proyecto (no va al repo de codigo)
+README.completo.md

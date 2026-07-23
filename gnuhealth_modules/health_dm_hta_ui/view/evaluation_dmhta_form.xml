@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- Formulario propio y limpio DM/HTA: una sola pantalla, cuatro grupos rotulados por
+             PROCEDENCIA para hacer evidente el enriquecimiento (capturado / calculado por reglas /
+             redactado por el modelo de lenguaje / detalle técnico). Vista INDEPENDIENTE (no hereda
+             el formulario nativo gigante). Se usan <group> (patrón de Tryton), sin <label>/<separator>
+             sueltos. -->
+        <record model="ir.ui.view" id="evaluation_dmhta_form_view">
+            <field name="model">gnuhealth.patient.evaluation</field>
+            <field name="type">form</field>
+            <field name="priority" eval="20"/>
+            <field name="arch" type="xml">
+                <![CDATA[
+                <form>
+                    <group col="4" colspan="4" id="grp_capturado"
+                        string="Datos capturados por el profesional">
+                        <label name="patient"/>
+                        <field name="patient"/>
+                        <label name="evaluation_start"/>
+                        <field name="evaluation_start"/>
+                        <label name="systolic"/>
+                        <field name="systolic"/>
+                        <label name="diastolic"/>
+                        <field name="diastolic"/>
+                        <label name="weight"/>
+                        <field name="weight"/>
+                        <label name="height"/>
+                        <field name="height"/>
+                        <label name="glycemia"/>
+                        <field name="glycemia"/>
+                        <label name="dmhta_perimetro_cintura"/>
+                        <field name="dmhta_perimetro_cintura"/>
+                        <label name="dmhta_antecedente_familiar"/>
+                        <field name="dmhta_antecedente_familiar"/>
+                        <label name="dmhta_actividad_fisica"/>
+                        <field name="dmhta_actividad_fisica"/>
+                        <label name="dmhta_verduras_frutas"/>
+                        <field name="dmhta_verduras_frutas"/>
+                        <label name="dmhta_medicacion_antihipertensiva"/>
+                        <field name="dmhta_medicacion_antihipertensiva"/>
+                        <label name="dmhta_antecedente_glucosa_alta"/>
+                        <field name="dmhta_antecedente_glucosa_alta"/>
+                        <label name="dmhta_catalogo"/>
+                        <field name="dmhta_catalogo"/>
+                        <button name="dmhta_calcular" string="Calcular valoración" colspan="2"/>
+                    </group>
+                    <group col="4" colspan="4" id="grp_reglas"
+                        string="Calculado por reglas deterministas (reproducible; según el catálogo elegido arriba)">
+                        <label name="dmhta_findrisc_puntaje"/>
+                        <field name="dmhta_findrisc_puntaje"/>
+                        <label name="dmhta_findrisc_categoria"/>
+                        <field name="dmhta_findrisc_categoria"/>
+                        <label name="dmhta_ta_categoria"/>
+                        <field name="dmhta_ta_categoria"/>
+                        <label name="dmhta_glucosa_interpretacion"/>
+                        <field name="dmhta_glucosa_interpretacion"/>
+                    </group>
+                    <group col="4" colspan="4" id="grp_ia"
+                        string="Redactado por el modelo de lenguaje — material de APOYO, NO sustituye al juicio del profesional; editable">
+                        <button name="dmhta_ia_interpretar" string="Interpretar con IA" colspan="2"/>
+                        <label name="dmhta_ia_texto_editado"/>
+                        <field name="dmhta_ia_texto_editado"/>
+                        <label name="dmhta_ia_modelo"/>
+                        <field name="dmhta_ia_modelo"/>
+                        <label name="dmhta_ia_fecha"/>
+                        <field name="dmhta_ia_fecha"/>
+                    </group>
+                    <group col="1" colspan="4" id="grp_ia_texto"
+                        string="Texto de apoyo (vacío = aún no se ha generado; presiona 'Interpretar con IA')">
+                        <field name="dmhta_ia_texto"/>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Detalle técnico" id="page_tecnico">
+                            <group col="1" colspan="4" id="grp_json"
+                                string="Valoración estructurada (JSON) — contrato técnico y evidencia de auditoría">
+                                <field name="dmhta_valoracion_estructurada"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </form>
+                ]]>
+            </field>
+        </record>
+    </data>
+</tryton>

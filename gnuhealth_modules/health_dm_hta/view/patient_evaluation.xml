@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- Hereda el formulario de evaluación y agrega una página de comorbilidad DM/HTA
+             dentro del notebook existente. Se usan <group> (patrón de GNU Health) en lugar de
+             elementos sueltos, para cumplir el esquema de vistas de Tryton. -->
+        <record model="ir.ui.view" id="patient_evaluation_view_form">
+            <field name="model">gnuhealth.patient.evaluation</field>
+            <field name="inherit" ref="health.gnuhealth_patient_evaluation_view"/>
+            <field name="arch" type="xml">
+                <![CDATA[
+                <data>
+                    <xpath expr="/form/notebook" position="inside">
+                        <page string="Comorbilidad DM/HTA" id="page_dmhta">
+                            <group col="4" colspan="4" id="grp_findrisc"
+                                string="Reactivos FINDRISC (valoración de APOYO por reglas: NO sustituye al profesional; editable)">
+                                <label name="dmhta_perimetro_cintura"/>
+                                <field name="dmhta_perimetro_cintura"/>
+                                <label name="dmhta_antecedente_familiar"/>
+                                <field name="dmhta_antecedente_familiar"/>
+                                <label name="dmhta_actividad_fisica"/>
+                                <field name="dmhta_actividad_fisica"/>
+                                <label name="dmhta_verduras_frutas"/>
+                                <field name="dmhta_verduras_frutas"/>
+                                <label name="dmhta_medicacion_antihipertensiva"/>
+                                <field name="dmhta_medicacion_antihipertensiva"/>
+                                <label name="dmhta_antecedente_glucosa_alta"/>
+                                <field name="dmhta_antecedente_glucosa_alta"/>
+                            </group>
+                            <group col="4" colspan="4" id="grp_valoracion" string="Valoración tentativa">
+                                <label name="dmhta_catalogo"/>
+                                <field name="dmhta_catalogo"/>
+                                <button name="dmhta_calcular" string="Calcular valoración" colspan="2"/>
+                                <label name="dmhta_findrisc_puntaje"/>
+                                <field name="dmhta_findrisc_puntaje"/>
+                                <label name="dmhta_findrisc_categoria"/>
+                                <field name="dmhta_findrisc_categoria"/>
+                                <label name="dmhta_ta_categoria"/>
+                                <field name="dmhta_ta_categoria"/>
+                                <label name="dmhta_glucosa_interpretacion"/>
+                                <field name="dmhta_glucosa_interpretacion"/>
+                                <label name="dmhta_editado_por_humano"/>
+                                <field name="dmhta_editado_por_humano"/>
+                            </group>
+                            <group col="1" colspan="4" id="grp_json" string="Valoración estructurada (JSON)">
+                                <field name="dmhta_valoracion_estructurada"/>
+                            </group>
+                        </page>
+                    </xpath>
+                </data>
+                ]]>
+            </field>
+        </record>
+    </data>
+</tryton>

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <!-- Lista propia DM/HTA: panel longitudinal (7 columnas legibles, sin amontonar).
+             El modelo ordena por evaluation_start DESC de fábrica: lo más reciente arriba. -->
+        <record model="ir.ui.view" id="evaluation_dmhta_tree_view">
+            <field name="model">gnuhealth.patient.evaluation</field>
+            <field name="type">tree</field>
+            <field name="priority" eval="20"/>
+            <field name="arch" type="xml">
+                <![CDATA[
+                <tree>
+                    <field name="patient"/>
+                    <!-- widget="date": Sao NO tiene widget 'datetime' en listas (solo 'date'/'time');
+                         sin esto, la lista revienta al dibujarse. Igual que las listas nativas. -->
+                    <field name="evaluation_start" widget="date"/>
+                    <field name="dmhta_findrisc_puntaje"/>
+                    <field name="dmhta_findrisc_categoria"/>
+                    <field name="dmhta_ta_categoria"/>
+                    <field name="dmhta_glucosa_interpretacion"/>
+                    <field name="dmhta_ia_fecha" widget="date"/>
+                </tree>
+                ]]>
+            </field>
+        </record>
+    </data>
+</tryton>

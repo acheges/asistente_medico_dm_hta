@@ -1,0 +1,7 @@
+# Evita meter basura al contexto de construcción de la imagen.
+*.md
+.env
+.env.*
+__pycache__/
+*.pyc
+*.log

@@ -1,0 +1,118 @@
+# Orquestación del despliegue de GNU Health.
+# Un solo "docker compose up" levanta la base de datos + GNU Health, conectados.
+# Lee las variables desde el archivo infra/.env (crear a partir de .env.example).
+
+name: asistente-medico-dm-hta
+
+services:
+  # --- Base de datos (PostgreSQL) ---
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db-data:/var/lib/postgresql/data   # volumen persistente: los datos sobreviven reinicios
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # --- GNU Health (backend trytond + API JSON-RPC + web Sao) ---
+  gnuhealth:
+    build:
+      # Contexto = raíz del repo (para incluir motor_valoracion/ y gnuhealth_modules/).
+      # El compose vive en infra/, por eso ".." apunta a la raíz.
+      context: ..
+      dockerfile: infra/gnuhealth/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy      # arranca solo cuando la base está sana
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      GNUHEALTH_PORT: ${GNUHEALTH_PORT}
+      GNUHEALTH_LANG: ${GNUHEALTH_LANG}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@localhost}
+      LOAD_DEMO_DATA: ${LOAD_DEMO_DATA}
+      # Feature C: la aduana (dentro de GNU Health) llama al ai-service por la red interna.
+      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai-service:8080}
+      AI_TIMEOUT: ${AI_TIMEOUT:-30}
+      AI_DESID_TOTAL: ${AI_DESID_TOTAL:-false}
+    ports:
+      - "${GNUHEALTH_PORT}:8000"          # navegador/API en http://localhost:${GNUHEALTH_PORT}
+    volumes:
+      - gnuhealth-attach:/var/lib/gnuhealth/attach
+    healthcheck:
+      # El endpoint / solo acepta POST (API JSON-RPC); un GET responde 405, lo cual
+      # ya indica que el servidor está vivo. Por eso NO usamos -f (que fallaría con 405).
+      test: ["CMD-SHELL", "curl -sS -o /dev/null http://localhost:8000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 600s                  # la 1a vez activa ~69 módulos de GNU Health (tarda varios min)
+    restart: unless-stopped
+
+  # --- Servidor FHIR (solo lectura) — OPCIONAL. Perfil "fhir" (apagado por defecto). ---
+  # Activar añadiendo 'fhir' a COMPOSE_PROFILES en infra/.env. EXPERIMENTAL (ver research.md).
+  fhir:
+    build:
+      context: ./fhir
+    profiles: ["fhir"]
+    depends_on:
+      gnuhealth:
+        condition: service_healthy
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${FHIR_PORT:-8080}:8080"
+    restart: unless-stopped
+
+  # --- Thalamus (hub REST de Federación) — OPCIONAL. Perfil "thalamus" (apagado). ---
+  # Activar añadiendo 'thalamus' a COMPOSE_PROFILES en infra/.env. EXPERIMENTAL (requiere MongoDB).
+  thalamus:
+    build:
+      context: ./thalamus
+    profiles: ["thalamus"]
+    ports:
+      - "${THALAMUS_PORT:-8443}:8443"
+    restart: unless-stopped
+
+  # --- Asistente de lenguaje (Feature C) — OPCIONAL. Perfil "ia" (apagado por defecto). ---
+  # Ciego a la identidad: solo recibe payloads YA seudonimizados. Se activa con COMPOSE_PROFILES=ia.
+  ai-service:
+    build:
+      context: ..
+      dockerfile: infra/ai-service/Dockerfile
+    profiles: ["ia"]
+    environment:
+      AI_PROVIDER_STYLE: ${AI_PROVIDER_STYLE:-openai}
+      AI_BASE_URL: ${AI_BASE_URL:-https://opencode.ai/zen/v1}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-kimi-k2.6}
+      AI_TIMEOUT: ${AI_TIMEOUT:-30}
+      AI_DRY_RUN: ${AI_DRY_RUN:-false}
+    ports:
+      - "${AI_PORT:-8090}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8080/salud')\" || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  gnuhealth-attach:

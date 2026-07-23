@@ -1,0 +1,103 @@
+/* ============================================================================
+   custom.css — Personalización global del cliente web Sao de GNU Health.
+   GNU Health lo carga solo (su index.html lo referencia) y el servidor lo sirve
+   desde la raíz web (/opt/gnuhealth/sao). Se aplica a TODA la interfaz.
+
+   Bloques:
+     1) Arreglo de amontonamiento de columnas en listas (defecto de Sao).
+     2) Tipografía Montserrat (empaquetada localmente, sin depender de internet).
+   Los colores se abordarán después, poco a poco.
+   ============================================================================ */
+
+
+/* ----------------------------------------------------------------------------
+   1) LISTAS LEGIBLES (corrige el amontonamiento de columnas)
+   ---------------------------------------------------------------------------- */
+.treeview table.tree {
+    table-layout: auto !important;
+}
+.treeview table.tree col {
+    width: auto !important;
+}
+.treeview table.tree thead th,
+.treeview table.tree thead th label,
+.treeview table.tree tbody td {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    min-width: max-content !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+}
+
+
+/* ----------------------------------------------------------------------------
+   2) TIPOGRAFÍA MONTSERRAT (local, confiable, offline-safe)
+   Los archivos .woff2 viven en /opt/gnuhealth/sao/fonts (los copia el Dockerfile);
+   se sirven junto a este css, por eso la ruta es relativa: fonts/...
+   ---------------------------------------------------------------------------- */
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('fonts/montserrat-400.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('fonts/montserrat-500.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('fonts/montserrat-600.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('fonts/montserrat-700.woff2') format('woff2');
+}
+
+/* Aplicar Montserrat en toda la interfaz (solo tipografía; sin tocar colores). */
+body, button, input, select, textarea,
+h1, h2, h3, h4, h5, h6,
+.navbar, .nav, .btn, .form-control, label, .panel-title, legend,
+.treeview table.tree, table, td, th, a, span, div {
+    font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+
+/* ----------------------------------------------------------------------------
+   3) ARREGLO: íconos gigantes en el buscador global de la barra superior.
+   CAUSA RAÍZ (bug de Tryton/GNU Health, no nuestro): el JavaScript asigna a los
+   íconos del desplegable la clase 'global_search-icon' (con GUION BAJO), pero el
+   CSS de Sao dimensiona 'global-search-icon' (con GUION MEDIO). Por ese typo la
+   regla de tamaño nunca aplica, y los íconos se pintan a su tamaño natural (los
+   de GNU Health miden 97px de origen → enormes). Aquí damos la regla para la
+   clase que SÍ se usa, y así todos quedan del mismo tamaño pequeño.
+   ---------------------------------------------------------------------------- */
+img.global_search-icon {
+    width: 1.75em !important;
+    height: 1.75em !important;
+    object-fit: contain !important;
+}
+
+
+/* ----------------------------------------------------------------------------
+   4) El desplegable del buscador global con su PROPIO scroll.
+   Problema: con muchos resultados, el menú crece tanto que empuja el scroll de
+   toda la interfaz. Solución: acotar su altura y darle scroll vertical interno,
+   sin afectar ningún otro menú (se limita a .global-search-container).
+   ---------------------------------------------------------------------------- */
+.global-search-container .dropdown-menu {
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
